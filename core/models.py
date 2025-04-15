@@ -18,14 +18,14 @@ class TaskType(models.Model):
 
 class Task(models.Model):
     class Priority(models.IntegerChoices):
-        URGENT = 1, "Critical"
-        HIGH = 2, "Important"
-        MEDIUM = 3, "Normal"
+        CRITICAL = 1, "Critical"
+        IMPORTANT = 2, "Important"
+        NORMAL = 3, "Normal"
         LOW = 4, "Low"
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, default="")
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField(null=True)
     is_completed = models.BooleanField(default=False)
     priority = models.SmallIntegerField(choices=Priority, default=Priority.LOW)
