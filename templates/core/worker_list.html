@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Team Members</h1>
+  </div>
+
+ 
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">All Team Members</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+          <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Active Tasks</th>
+            <th>Completed Tasks</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for worker in workers %}
+            <tr>
+              <td>
+                <a href="{% url 'core:worker-detail' worker.pk %}">
+                  {{ worker.get_full_name|default:worker.username }}
+                </a>
+              </td>
+              <td>{{ worker.username }}</td>
+              <td>{{ worker.email }}</td>
+              <td>
+                            <span class="badge badge-primary">
+                                {{ worker.tasks.filter.is_completed=False|length }}
+                            </span>
+              </td>
+              <td>
+                            <span class="badge badge-success">
+                                {{ worker.tasks.filter.is_completed=True|length }}
+                            </span>
+              </td>
+              <td>
+                <a href="{% url 'core:worker-detail' worker.pk %}" class="btn btn-info btn-sm">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No team members found.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
