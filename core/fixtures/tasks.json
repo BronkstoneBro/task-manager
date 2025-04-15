@@ -1,0 +1,72 @@
+[
+    {
+        "model": "core.task",
+        "pk": 1,
+        "fields": {
+            "name": "Fix login page error",
+            "description": "Users are unable to log in when using special characters in their password",
+            "created_at": "2025-04-01T10:00:00Z",
+            "deadline": "2025-04-15T18:00:00Z",
+            "is_completed": false,
+            "priority": 1,
+            "task_type": 1,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 2,
+        "fields": {
+            "name": "Implement user profile page",
+            "description": "Create a new page where users can view and edit their profile information",
+            "created_at": "2025-04-02T09:30:00Z",
+            "deadline": "2025-04-20T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 2,
+            "assigners": [1, 2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 3,
+        "fields": {
+            "name": "Review pull request #123",
+            "description": "Review the changes in the new authentication system implementation",
+            "created_at": "2025-04-03T14:00:00Z",
+            "deadline": "2025-04-05T18:00:00Z",
+            "is_completed": true,
+            "priority": 3,
+            "task_type": 3,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 4,
+        "fields": {
+            "name": "Update API documentation",
+            "description": "Document the new endpoints added in the last release",
+            "created_at": "2025-04-04T11:00:00Z",
+            "deadline": "2025-04-10T18:00:00Z",
+            "is_completed": false,
+            "priority": 3,
+            "task_type": 4,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 5,
+        "fields": {
+            "name": "Test new search functionality",
+            "description": "Perform comprehensive testing of the new search feature",
+            "created_at": "2025-04-05T13:00:00Z",
+            "deadline": "2025-04-12T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 5,
+            "assigners": [2]
+        }
+    }
+] 
