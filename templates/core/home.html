@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Your Tasks</h2>
+    <a href="{% url 'core:task-create' %}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> New Task
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th>Task</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Deadline</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for task in tasks %}
+            <tr>
+              <td>
+                <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
+              </td>
+              <td>{{ task.task_type }}</td>
+              <td>
+                            <span
+                                class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
+                                {{ task.get_priority_display }}
+                            </span>
+              </td>
+              <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
+              <td>
+                {% if task.is_completed %}
+                  <span class="badge bg-success">Completed</span>
+                {% else %}
+                  <span class="badge bg-warning">In Progress</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-edit"></i>
+                </a>
+                {% if not task.is_completed %}
+                  <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-check"></i>
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No tasks assigned to you.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %} 
