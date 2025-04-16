@@ -13,63 +13,63 @@
       <div class="table-responsive">
         <table class="table table-hover">
           <thead class="table-light">
-            <tr>
-              <th>Task</th>
-              <th>Type</th>
-              <th>Priority</th>
-              <th>Deadline</th>
-              <th>Status</th>
-              <th>Assigned To</th>
-              <th>Actions</th>
-            </tr>
+          <tr>
+            <th>Task</th>
+            <th>Type</th>
+            <th>Priority</th>
+            <th>Deadline</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Actions</th>
+          </tr>
           </thead>
           <tbody>
-            {% for task in tasks %}
-              <tr>
-                <td>
-                  <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
-                </td>
-                <td>{{ task.task_type }}</td>
-                <td>
+          {% for task in tasks %}
+            <tr>
+              <td>
+                <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
+              </td>
+              <td>{{ task.task_type }}</td>
+              <td>
                   <span
-                    class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
+                      class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
                     {{ task.get_priority_display }}
                   </span>
-                </td>
-                <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
-                <td>
-                  {% if task.is_completed %}
-                    <span class="badge bg-success">Completed</span>
-                  {% else %}
-                    <span class="badge bg-warning">In Progress</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% for assignee in task.assigners.all %}
-                    <a href="{% url 'core:worker-detail' assignee.pk %}" class="badge bg-info text-decoration-none">
-                      {{ assignee.get_full_name|default:assignee.username }}
-                    </a>
-                  {% endfor %}
-                </td>
-                <td>
-                  <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
-                    <i class="fas fa-eye"></i>
+              </td>
+              <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
+              <td>
+                {% if task.is_completed %}
+                  <span class="badge bg-success">Completed</span>
+                {% else %}
+                  <span class="badge bg-warning">In Progress</span>
+                {% endif %}
+              </td>
+              <td>
+                {% for assignee in task.assigners.all %}
+                  <a href="{% url 'core:worker-detail' assignee.pk %}" class="badge bg-info text-decoration-none">
+                    {{ assignee.get_full_name|default:assignee.username }}
                   </a>
-                  <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-edit"></i>
+                {% endfor %}
+              </td>
+              <td>
+                <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-edit"></i>
+                </a>
+                {% if not task.is_completed %}
+                  <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-check"></i>
                   </a>
-                  {% if not task.is_completed %}
-                    <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
-                      <i class="fas fa-check"></i>
-                    </a>
-                  {% endif %}
-                </td>
-              </tr>
-            {% empty %}
-              <tr>
-                <td colspan="7" class="text-center">No tasks found.</td>
-              </tr>
-            {% endfor %}
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="text-center">No tasks found.</td>
+            </tr>
+          {% endfor %}
           </tbody>
         </table>
       </div>
