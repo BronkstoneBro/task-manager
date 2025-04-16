@@ -7,10 +7,16 @@
       <a href="{% url 'core:task-update' task.pk %}" class="btn btn-primary">
         <i class="fas fa-edit"></i> Edit
       </a>
+      <a href="{% url 'core:task-delete' task.pk %}" class="btn btn-danger">
+        <i class="fas fa-trash"></i> Delete
+      </a>
       {% if not task.is_completed %}
-        <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-success">
-          <i class="fas fa-check"></i> Mark as Completed
-        </a>
+        <form method="post" action="{% url 'core:task-complete' task.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check"></i> Mark as Completed
+          </button>
+        </form>
       {% endif %}
     </div>
   </div>
@@ -48,10 +54,12 @@
           <div class="mb-3">
             <strong>Assigned To:</strong>
             <div class="mt-2">
-              {% for assignee in task.assigners.all %}
-                <a href="{% url 'core:worker-detail' assignee.pk %}" class="badge bg-info text-decoration-none">
-                  {{ assignee.get_full_name|default:assignee.username }}
+              {% for worker in task.assigners.all %}
+                <a href="{% url 'core:worker-detail' worker.pk %}" class="badge bg-primary text-decoration-none">
+                  {{ worker.get_full_name|default:worker.username }}
                 </a>
+              {% empty %}
+                <span class="text-muted">No one assigned</span>
               {% endfor %}
             </div>
           </div>
