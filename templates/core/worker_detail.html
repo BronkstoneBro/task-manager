@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block content %}
-  <!-- Page Heading -->
+
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Team Member Profile</h1>
   </div>
 
-  <!-- Worker Info Card -->
+
   <div class="card shadow mb-4">
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <!-- Active Tasks Card -->
+
   <div class="card shadow mb-4">
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary">Active Tasks</h6>
@@ -92,7 +92,7 @@
               <td>{{ task.task_type }}</td>
               <td>
                             <span
-                                class="badge badge-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
+                                class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
                                 {{ task.get_priority_display }}
                             </span>
               </td>
@@ -114,7 +114,7 @@
     </div>
   </div>
 
-  <!-- Completed Tasks Card -->
+
   <div class="card shadow mb-4">
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary">Completed Tasks</h6>
@@ -140,7 +140,7 @@
               <td>{{ task.task_type }}</td>
               <td>
                             <span
-                                class="badge badge-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
+                                class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
                                 {{ task.get_priority_display }}
                             </span>
               </td>
