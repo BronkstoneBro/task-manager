@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -8,68 +9,99 @@
     </a>
   </div>
 
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-8">
+          <div class="input-group">
+            <input type="text" 
+                   name="search" 
+                   class="form-control" 
+                   placeholder="Search tasks by name, description, or type..." 
+                   value="{{ search_query }}">
+            <button class="btn btn-outline-secondary" type="submit">
+              <i class="fas fa-search"></i> Search
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <a href="{% url 'core:task-list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-times"></i> Clear Search
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-body">
       <div class="table-responsive">
         <table class="table table-hover">
           <thead class="table-light">
-          <tr>
-            <th>Task</th>
-            <th>Type</th>
-            <th>Priority</th>
-            <th>Deadline</th>
-            <th>Status</th>
-            <th>Assigned To</th>
-            <th>Actions</th>
-          </tr>
+            <tr>
+              <th>Task</th>
+              <th>Type</th>
+              <th>Priority</th>
+              <th>Deadline</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
           </thead>
           <tbody>
-          {% for task in tasks %}
-            <tr>
-              <td>
-                <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
-              </td>
-              <td>{{ task.task_type }}</td>
-              <td>
+            {% for task in tasks %}
+              <tr>
+                <td>
+                  <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
+                </td>
+                <td>{{ task.task_type }}</td>
+                <td>
                   <span
-                      class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
+                    class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
                     {{ task.get_priority_display }}
                   </span>
-              </td>
-              <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
-              <td>
-                {% if task.is_completed %}
-                  <span class="badge bg-success">Completed</span>
-                {% else %}
-                  <span class="badge bg-warning">In Progress</span>
-                {% endif %}
-              </td>
-              <td>
-                {% for assignee in task.assigners.all %}
-                  <a href="{% url 'core:worker-detail' assignee.pk %}" class="badge bg-info text-decoration-none">
-                    {{ assignee.get_full_name|default:assignee.username }}
+                </td>
+                <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
+                <td>
+                  {% if task.is_completed %}
+                    <span class="badge bg-success">Completed</span>
+                  {% else %}
+                    <span class="badge bg-warning">In Progress</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% for assignee in task.assigners.all %}
+                    <a href="{% url 'core:worker-detail' assignee.pk %}" class="badge bg-info text-decoration-none">
+                      {{ assignee.get_full_name|default:assignee.username }}
+                    </a>
+                  {% endfor %}
+                </td>
+                <td>
+                  <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
+                    <i class="fas fa-eye"></i>
                   </a>
-                {% endfor %}
-              </td>
-              <td>
-                <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
-                  <i class="fas fa-eye"></i>
-                </a>
-                <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
-                  <i class="fas fa-edit"></i>
-                </a>
-                {% if not task.is_completed %}
-                  <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
-                    <i class="fas fa-check"></i>
+                  <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-edit"></i>
                   </a>
-                {% endif %}
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="7" class="text-center">No tasks found.</td>
-            </tr>
-          {% endfor %}
+                  {% if not task.is_completed %}
+                    <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
+                      <i class="fas fa-check"></i>
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center">
+                  {% if search_query %}
+                    No tasks found matching your search criteria.
+                  {% else %}
+                    No tasks found.
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
           </tbody>
         </table>
       </div>

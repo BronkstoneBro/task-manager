@@ -15,6 +15,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.utils import timezone
 from django import forms
+from django.db.models import Q
 
 from .models import Task, TaskType
 
@@ -39,9 +40,22 @@ class TaskListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Task.objects.all().order_by(
-            "is_completed", "deadline", "priority"
-        )
+        queryset = Task.objects.all()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(task_type__name__icontains=search_query)
+            )
+        
+        return queryset.order_by("is_completed", "deadline", "priority")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
 
 
 class TaskDetailView(LoginRequiredMixin, DetailView):
