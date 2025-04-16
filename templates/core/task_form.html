@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
 
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-4">
@@ -14,50 +15,14 @@
         {% csrf_token %}
         <div class="row">
           <div class="col-md-6">
-            <div class="mb-3">
-              <label for="{{ form.name.id_for_label }}" class="form-label">Task Name</label>
-              {{ form.name }}
-              {% if form.name.errors %}
-                <div class="text-danger">{{ form.name.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-              {{ form.description }}
-              {% if form.description.errors %}
-                <div class="text-danger">{{ form.description.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label for="{{ form.task_type.id_for_label }}" class="form-label">Task Type</label>
-              {{ form.task_type }}
-              {% if form.task_type.errors %}
-                <div class="text-danger">{{ form.task_type.errors }}</div>
-              {% endif %}
-            </div>
+            {{ form.name|as_crispy_field }}
+            {{ form.description|as_crispy_field }}
+            {{ form.task_type|as_crispy_field }}
           </div>
           <div class="col-md-6">
-            <div class="mb-3">
-              <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
-              {{ form.priority }}
-              {% if form.priority.errors %}
-                <div class="text-danger">{{ form.priority.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label for="{{ form.deadline.id_for_label }}" class="form-label">Deadline</label>
-              {{ form.deadline }}
-              {% if form.deadline.errors %}
-                <div class="text-danger">{{ form.deadline.errors }}</div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label for="{{ form.assigners.id_for_label }}" class="form-label">Assign To</label>
-              {{ form.assigners }}
-              {% if form.assigners.errors %}
-                <div class="text-danger">{{ form.assigners.errors }}</div>
-              {% endif %}
-            </div>
+            {{ form.priority|as_crispy_field }}
+            {{ form.deadline|as_crispy_field }}
+            {{ form.assigners|as_crispy_field }}
           </div>
         </div>
         <div class="text-end">
@@ -68,4 +33,10 @@
       </form>
     </div>
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 {% endblock %} 
