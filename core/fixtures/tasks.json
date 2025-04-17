@@ -5,8 +5,8 @@
         "fields": {
             "name": "Fix login page error",
             "description": "Users are unable to log in when using special characters in their password",
-            "created_at": "2025-04-01T10:00:00Z",
-            "deadline": "2025-04-15T18:00:00Z",
+            "created_at": "2024-04-01T10:00:00Z",
+            "deadline": "2024-04-15T18:00:00Z",
             "is_completed": false,
             "priority": 1,
             "task_type": 1,
@@ -19,8 +19,8 @@
         "fields": {
             "name": "Implement user profile page",
             "description": "Create a new page where users can view and edit their profile information",
-            "created_at": "2025-04-02T09:30:00Z",
-            "deadline": "2025-04-20T18:00:00Z",
+            "created_at": "2024-04-02T09:30:00Z",
+            "deadline": "2024-04-20T18:00:00Z",
             "is_completed": false,
             "priority": 2,
             "task_type": 2,
@@ -33,8 +33,8 @@
         "fields": {
             "name": "Review pull request #123",
             "description": "Review the changes in the new authentication system implementation",
-            "created_at": "2025-04-03T14:00:00Z",
-            "deadline": "2025-04-05T18:00:00Z",
+            "created_at": "2024-04-03T14:00:00Z",
+            "deadline": "2024-04-05T18:00:00Z",
             "is_completed": true,
             "priority": 3,
             "task_type": 3,
@@ -47,8 +47,8 @@
         "fields": {
             "name": "Update API documentation",
             "description": "Document the new endpoints added in the last release",
-            "created_at": "2025-04-04T11:00:00Z",
-            "deadline": "2025-04-10T18:00:00Z",
+            "created_at": "2024-04-04T11:00:00Z",
+            "deadline": "2024-04-10T18:00:00Z",
             "is_completed": false,
             "priority": 3,
             "task_type": 4,
@@ -61,12 +61,222 @@
         "fields": {
             "name": "Test new search functionality",
             "description": "Perform comprehensive testing of the new search feature",
-            "created_at": "2025-04-05T13:00:00Z",
-            "deadline": "2025-04-12T18:00:00Z",
+            "created_at": "2024-04-05T13:00:00Z",
+            "deadline": "2024-04-12T18:00:00Z",
             "is_completed": false,
             "priority": 2,
             "task_type": 5,
             "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 6,
+        "fields": {
+            "name": "Optimize database queries",
+            "description": "Improve performance of frequently used database queries",
+            "created_at": "2024-04-06T09:00:00Z",
+            "deadline": "2024-04-18T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 2,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 7,
+        "fields": {
+            "name": "Fix mobile responsiveness",
+            "description": "Address layout issues on mobile devices",
+            "created_at": "2024-04-07T11:00:00Z",
+            "deadline": "2024-04-14T18:00:00Z",
+            "is_completed": false,
+            "priority": 1,
+            "task_type": 1,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 8,
+        "fields": {
+            "name": "Implement dark mode",
+            "description": "Add dark mode support to the application",
+            "created_at": "2024-04-08T14:00:00Z",
+            "deadline": "2024-04-25T18:00:00Z",
+            "is_completed": false,
+            "priority": 3,
+            "task_type": 2,
+            "assigners": [1, 2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 9,
+        "fields": {
+            "name": "Update user guide",
+            "description": "Update the user guide with new features",
+            "created_at": "2024-04-09T10:00:00Z",
+            "deadline": "2024-04-16T18:00:00Z",
+            "is_completed": false,
+            "priority": 4,
+            "task_type": 4,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 10,
+        "fields": {
+            "name": "Review security audit",
+            "description": "Review and implement security audit recommendations",
+            "created_at": "2024-04-10T09:00:00Z",
+            "deadline": "2024-04-17T18:00:00Z",
+            "is_completed": false,
+            "priority": 1,
+            "task_type": 3,
+            "assigners": [1, 2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 11,
+        "fields": {
+            "name": "Add email notifications",
+            "description": "Implement email notifications for task updates",
+            "created_at": "2024-04-11T11:00:00Z",
+            "deadline": "2024-04-22T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 2,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 12,
+        "fields": {
+            "name": "Fix file upload bug",
+            "description": "Resolve issues with large file uploads",
+            "created_at": "2024-04-12T13:00:00Z",
+            "deadline": "2024-04-19T18:00:00Z",
+            "is_completed": false,
+            "priority": 1,
+            "task_type": 1,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 13,
+        "fields": {
+            "name": "Update dependencies",
+            "description": "Update all project dependencies to latest versions",
+            "created_at": "2024-04-13T10:00:00Z",
+            "deadline": "2024-04-20T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 2,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 14,
+        "fields": {
+            "name": "Write unit tests",
+            "description": "Add unit tests for new features",
+            "created_at": "2024-04-14T14:00:00Z",
+            "deadline": "2024-04-21T18:00:00Z",
+            "is_completed": false,
+            "priority": 3,
+            "task_type": 5,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 15,
+        "fields": {
+            "name": "Optimize image loading",
+            "description": "Implement lazy loading for images",
+            "created_at": "2024-04-15T09:00:00Z",
+            "deadline": "2024-04-23T18:00:00Z",
+            "is_completed": false,
+            "priority": 3,
+            "task_type": 2,
+            "assigners": [1, 2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 16,
+        "fields": {
+            "name": "Fix memory leak",
+            "description": "Identify and fix memory leak in the application",
+            "created_at": "2024-04-16T11:00:00Z",
+            "deadline": "2024-04-24T18:00:00Z",
+            "is_completed": false,
+            "priority": 1,
+            "task_type": 1,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 17,
+        "fields": {
+            "name": "Update error handling",
+            "description": "Improve error handling and user feedback",
+            "created_at": "2024-04-17T13:00:00Z",
+            "deadline": "2024-04-26T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 2,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 18,
+        "fields": {
+            "name": "Review accessibility",
+            "description": "Conduct accessibility review and implement improvements",
+            "created_at": "2024-04-18T10:00:00Z",
+            "deadline": "2024-04-27T18:00:00Z",
+            "is_completed": false,
+            "priority": 3,
+            "task_type": 3,
+            "assigners": [1]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 19,
+        "fields": {
+            "name": "Update deployment docs",
+            "description": "Update deployment documentation with new procedures",
+            "created_at": "2024-04-19T14:00:00Z",
+            "deadline": "2024-04-28T18:00:00Z",
+            "is_completed": false,
+            "priority": 4,
+            "task_type": 4,
+            "assigners": [2]
+        }
+    },
+    {
+        "model": "core.task",
+        "pk": 20,
+        "fields": {
+            "name": "Test performance",
+            "description": "Conduct performance testing and optimization",
+            "created_at": "2024-04-20T09:00:00Z",
+            "deadline": "2024-04-29T18:00:00Z",
+            "is_completed": false,
+            "priority": 2,
+            "task_type": 5,
+            "assigners": [1, 2]
         }
     }
 ] 
