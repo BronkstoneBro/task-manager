@@ -1,64 +1,116 @@
 {% extends "base.html" %}
-{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Team Members{% endblock %}
 
 {% block content %}
-
-  <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Team Members</h1>
-  </div>
-
-
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">All Team Members</h6>
+<div class="container py-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="fas fa-users me-2"></i>Team Members
+            </h1>
+            <p class="text-muted mb-0">View and manage your team members</p>
+        </div>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-          <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Active Tasks</th>
-            <th>Completed Tasks</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for worker in workers %}
-            <tr>
-              <td>
-                <a href="{% url 'core:worker-detail' worker.pk %}">
-                  {{ worker.get_full_name|default:worker.username }}
-                </a>
-              </td>
-              <td>{{ worker.username }}</td>
-              <td>{{ worker.email }}</td>
-              <td>
-                <span class="badge bg-primary">
-                  {{ worker.active_tasks_count }}
-                </span>
-              </td>
-              <td>
-                <span class="badge bg-success">
-                  {{ worker.completed_tasks_count }}
-                </span>
-              </td>
-              <td>
-                <a href="{% url 'core:worker-detail' worker.pk %}" class="btn btn-info btn-sm">
-                  <i class="fas fa-eye"></i>
-                </a>
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="6" class="text-center">No team members found.</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
+
+    <!-- Team Members List -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if workers %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 ps-4">Name</th>
+                                <th class="border-0">Username</th>
+                                <th class="border-0">Email</th>
+                                <th class="border-0">Active Tasks</th>
+                                <th class="border-0">Completed Tasks</th>
+                                <th class="border-0 pe-4 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for worker in workers %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="fw-medium">
+                                            <i class="fas fa-user text-muted me-2"></i>
+                                            {{ worker.get_full_name|default:worker.username }}
+                                        </span>
+                                    </td>
+                                    <td>{{ worker.username }}</td>
+                                    <td>{{ worker.email }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-tasks me-1"></i>{{ worker.active_tasks_count }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>{{ worker.completed_tasks_count }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4">
+                                        <div class="btn-group">
+                                            <a href="{% url 'core:worker-detail' worker.pk %}" class="btn btn-sm btn-outline-primary" title="View Profile">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav class="mt-4 px-4 pb-4">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-users fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">No team members found</h5>
+                    <p class="text-muted mb-4">There are no team members in the system</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
-  </div>
+</div>
 {% endblock %}
