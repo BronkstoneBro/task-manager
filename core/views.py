@@ -13,7 +13,7 @@ from django.views.generic import (
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.utils import timezone
 from django import forms
@@ -302,6 +302,11 @@ class TaskTypeDeleteView(LoginRequiredMixin, DeleteView):
 
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
+    authentication_form = AuthenticationForm
+
+    def form_invalid(self, form):
+        # Let the form handle its own errors
+        return self.render_to_response(self.get_context_data(form=form))
 
     def form_valid(self, form):
         messages.success(self.request, "You have been logged in successfully.")

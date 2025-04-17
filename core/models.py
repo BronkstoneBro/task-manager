@@ -97,20 +97,20 @@ class Task(models.Model):
         related_name="tasks"
     )
 
-    def can_complete(self, user):
-        if not self.team:
-            return True
-        return self.team.is_member(user)
-
     def can_edit(self, user):
-        if not self.team:
-            return True
-        return self.team.is_member(user)
+        if self.team:
+            return self.team.members.filter(pk=user.pk).exists()
+        return self.created_by == user or user in self.assigners.all()
 
     def can_delete(self, user):
-        if not self.team:
-            return True
-        return self.team.is_member(user)
+        if self.team:
+            return self.team.members.filter(pk=user.pk).exists()
+        return self.created_by == user
+
+    def can_complete(self, user):
+        if self.team:
+            return self.team.members.filter(pk=user.pk).exists()
+        return user in self.assigners.all()
 
     class Meta:
         default_related_name = "tasks"
