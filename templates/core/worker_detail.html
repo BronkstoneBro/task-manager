@@ -157,7 +157,7 @@
                             {% for task in completed_tasks %}
                                 <tr>
                                     <td class="ps-4">
-                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-bold text-dark hover-primary">
+                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-bold text-success hover-primary">
                                             {{ task.name }}
                                         </a>
                                     </td>
