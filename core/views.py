@@ -18,6 +18,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django import forms
 from django.db.models import Q
+from django.http import Http404
 
 from .models import Task, TaskType, Team, TeamMember
 
@@ -31,9 +32,16 @@ class HomeView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Task.objects.filter(assigners=self.request.user).order_by(
-            "is_completed", "deadline", "priority"
+
+        assigned_tasks = Task.objects.filter(assigners=self.request.user)
+
+        team_tasks = Task.objects.filter(
+            team__members=self.request.user, team__isnull=False
         )
+
+        queryset = (assigned_tasks | team_tasks).distinct()
+
+        return queryset.order_by("is_completed", "deadline", "priority")
 
 
 class TaskListView(LoginRequiredMixin, ListView):
@@ -43,21 +51,23 @@ class TaskListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = Task.objects.all()
-        search_query = self.request.GET.get('search', '')
-        
+        queryset = Task.objects.filter(
+            team__isnull=True
+        )  # Only show non-team tasks
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query) |
-                Q(task_type__name__icontains=search_query)
+                Q(name__icontains=search_query)
+                | Q(description__icontains=search_query)
+                | Q(task_type__name__icontains=search_query)
             )
-        
+
         return queryset.order_by("is_completed", "deadline", "priority")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         return context
 
 
@@ -65,6 +75,16 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
     model = Task
     template_name = "core/task_detail.html"
     context_object_name = "task"
+
+    def get_object(self, queryset=None):
+        task = super().get_object(queryset)
+        # Check if task is a team task and user is not a member
+        if (
+            task.team
+            and not task.team.members.filter(pk=self.request.user.pk).exists()
+        ):
+            raise Http404("You don't have permission to view this task.")
+        return task
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -94,9 +114,9 @@ class TaskForm(forms.ModelForm):
                 attrs={
                     "class": "form-select",
                     "data-placeholder": "Select assignees...",
-                    "multiple": "multiple"
+                    "multiple": "multiple",
                 }
-            )
+            ),
         }
 
 
@@ -114,7 +134,14 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
     template_name = "core/task_form.html"
-    fields = ["name", "description", "deadline", "priority", "task_type", "assigners"]
+    fields = [
+        "name",
+        "description",
+        "deadline",
+        "priority",
+        "task_type",
+        "assigners",
+    ]
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -126,7 +153,9 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         task = self.get_object()
         if not task.can_edit(request.user):
-            messages.error(request, "You don't have permission to edit this task.")
+            messages.error(
+                request, "You don't have permission to edit this task."
+            )
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
 
@@ -139,7 +168,9 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
     def dispatch(self, request, *args, **kwargs):
         task = self.get_object()
         if not task.can_delete(request.user):
-            messages.error(request, "You don't have permission to delete this task.")
+            messages.error(
+                request, "You don't have permission to delete this task."
+            )
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
 
@@ -151,7 +182,9 @@ class TaskCompleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         task = get_object_or_404(Task, pk=kwargs["pk"])
         if not task.can_complete(request.user):
-            messages.error(request, "You don't have permission to complete this task.")
+            messages.error(
+                request, "You don't have permission to complete this task."
+            )
             return redirect("core:task-detail", pk=task.pk)
         task.is_completed = True
         task.save()
@@ -166,7 +199,9 @@ class TaskUncompleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         task = get_object_or_404(Task, pk=kwargs["pk"])
         if not task.can_complete(request.user):
-            messages.error(request, "You don't have permission to uncomplete this task.")
+            messages.error(
+                request, "You don't have permission to uncomplete this task."
+            )
             return redirect("core:task-detail", pk=task.pk)
         task.is_completed = False
         task.save()
@@ -208,8 +243,12 @@ class WorkerDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         worker = self.get_object()
-        context["assigned_tasks"] = worker.assigned_tasks.filter(is_completed=False)
-        context["completed_tasks"] = worker.assigned_tasks.filter(is_completed=True)
+        context["assigned_tasks"] = worker.assigned_tasks.filter(
+            is_completed=False
+        )
+        context["completed_tasks"] = worker.assigned_tasks.filter(
+            is_completed=True
+        )
         context["created_tasks"] = worker.created_tasks.all()
         return context
 
@@ -297,40 +336,40 @@ class RegisterView(CreateView):
 
 class LandingPageView(TemplateView):
     template_name = "core/landing_page.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["features"] = [
             {
                 "title": "Task Management",
                 "description": "Efficiently create, track, and manage your tasks with our intuitive interface.",
-                "icon": "fas fa-tasks"
+                "icon": "fas fa-tasks",
             },
             {
                 "title": "Priority System",
                 "description": "Organize tasks by priority levels (Critical, Important, Normal, Low) for better workflow management.",
-                "icon": "fas fa-flag"
+                "icon": "fas fa-flag",
             },
             {
                 "title": "Task Types",
                 "description": "Categorize tasks into different types like Bug Fix, Feature Development, Code Review, and more.",
-                "icon": "fas fa-tags"
+                "icon": "fas fa-tags",
             },
             {
                 "title": "Deadline Tracking",
                 "description": "Set and track deadlines for all your tasks to ensure timely completion.",
-                "icon": "fas fa-calendar-alt"
+                "icon": "fas fa-calendar-alt",
             },
             {
                 "title": "Team Collaboration",
                 "description": "Assign tasks to team members and track their progress in real-time.",
-                "icon": "fas fa-users"
+                "icon": "fas fa-users",
             },
             {
                 "title": "User Profiles",
                 "description": "Manage your profile and view your assigned tasks in one place.",
-                "icon": "fas fa-user"
-            }
+                "icon": "fas fa-user",
+            },
         ]
         return context
 
@@ -353,11 +392,8 @@ class TeamCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
-        # Add creator as team member
         TeamMember.objects.create(
-            team=form.instance,
-            member=self.request.user,
-            is_admin=True
+            team=form.instance, member=self.request.user, is_admin=True
         )
         return response
 
@@ -372,8 +408,9 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         team = self.get_object()
         context["members"] = team.members.all()
         context["tasks"] = team.tasks.all()
-        # Add all users for the Add Member modal
-        context["all_users"] = Worker.objects.exclude(pk__in=team.members.values_list('pk', flat=True))
+        context["all_users"] = Worker.objects.exclude(
+            pk__in=team.members.values_list("pk", flat=True)
+        )
         return context
 
 
@@ -381,7 +418,10 @@ class TeamAddMemberView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         team = get_object_or_404(Team, pk=kwargs["pk"])
         if not team.can_manage_members(request.user):
-            messages.error(request, "You don't have permission to add members to this team.")
+            messages.error(
+                request,
+                "You don't have permission to add members to this team.",
+            )
             return redirect("core:team-detail", pk=team.pk)
 
         user_id = request.POST.get("user_id")
@@ -395,7 +435,9 @@ class TeamAddMemberView(LoginRequiredMixin, View):
             return redirect("core:team-detail", pk=team.pk)
 
         TeamMember.objects.create(team=team, member=user)
-        messages.success(request, f"{user.username} has been added to the team.")
+        messages.success(
+            request, f"{user.username} has been added to the team."
+        )
         return redirect("core:team-detail", pk=team.pk)
 
 
@@ -403,7 +445,10 @@ class TeamRemoveMemberView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         team = get_object_or_404(Team, pk=kwargs["pk"])
         if not team.can_manage_members(request.user):
-            messages.error(request, "You don't have permission to remove members from this team.")
+            messages.error(
+                request,
+                "You don't have permission to remove members from this team.",
+            )
             return redirect("core:team-detail", pk=team.pk)
 
         user_id = request.POST.get("user_id")
@@ -417,7 +462,9 @@ class TeamRemoveMemberView(LoginRequiredMixin, View):
             return redirect("core:team-detail", pk=team.pk)
 
         TeamMember.objects.filter(team=team, member=user).delete()
-        messages.success(request, f"{user.username} has been removed from the team.")
+        messages.success(
+            request, f"{user.username} has been removed from the team."
+        )
         return redirect("core:team-detail", pk=team.pk)
 
 
@@ -429,19 +476,21 @@ class TeamTaskCreateView(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         team = get_object_or_404(Team, pk=self.kwargs["pk"])
-        # Only show team members in the assigners field
         form.fields["assigners"].queryset = team.members.all()
         return form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Create Team Task'
+        context["title"] = "Create Team Task"
         return context
 
     def form_valid(self, form):
         team = get_object_or_404(Team, pk=self.kwargs["pk"])
         if not team.can_manage_tasks(self.request.user):
-            messages.error(self.request, "You don't have permission to create tasks in this team.")
+            messages.error(
+                self.request,
+                "You don't have permission to create tasks in this team.",
+            )
             return redirect("core:team-detail", pk=team.pk)
 
         form.instance.created_by = self.request.user
@@ -451,4 +500,6 @@ class TeamTaskCreateView(LoginRequiredMixin, CreateView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy("core:team-detail", kwargs={"pk": self.kwargs["pk"]})
+        return reverse_lazy(
+            "core:team-detail", kwargs={"pk": self.kwargs["pk"]}
+        )
