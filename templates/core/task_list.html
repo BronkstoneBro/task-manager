@@ -69,6 +69,11 @@
                                             <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            {% if not task.is_completed %}
+                                                <a href="{% url 'core:task-complete' pk=task.pk %}" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% endif %}
                                             <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-trash"></i>
                                             </a>
