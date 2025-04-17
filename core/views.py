@@ -9,6 +9,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView,
     TemplateView,
+    View,
 )
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
@@ -18,7 +19,7 @@ from django.utils import timezone
 from django import forms
 from django.db.models import Q
 
-from .models import Task, TaskType
+from .models import Task, TaskType, Team, TeamMember
 
 Worker = get_user_model()
 
@@ -65,6 +66,14 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
     template_name = "core/task_detail.html"
     context_object_name = "task"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        task = self.get_object()
+        context["can_edit"] = task.can_edit(self.request.user)
+        context["can_delete"] = task.can_delete(self.request.user)
+        context["can_complete"] = task.can_complete(self.request.user)
+        return context
+
 
 class TaskForm(forms.ModelForm):
     class Meta:
@@ -104,14 +113,22 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
 
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
-    form_class = TaskForm
     template_name = "core/task_form.html"
-    success_url = reverse_lazy("core:task-list")
+    fields = ["name", "description", "deadline", "priority", "task_type", "assigners"]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["now"] = timezone.now()
-        return context
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        task = self.get_object()
+        if task.team:
+            form.fields["assigners"].queryset = task.team.members.all()
+        return form
+
+    def dispatch(self, request, *args, **kwargs):
+        task = self.get_object()
+        if not task.can_edit(request.user):
+            messages.error(request, "You don't have permission to edit this task.")
+            return redirect("core:task-detail", pk=task.pk)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
@@ -119,29 +136,38 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "core/task_confirm_delete.html"
     success_url = reverse_lazy("core:task-list")
 
-    def delete(self, request, *args, **kwargs):
-        messages.success(request, "Task deleted successfully.")
-        return super().delete(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        task = self.get_object()
+        if not task.can_delete(request.user):
+            messages.error(request, "You don't have permission to delete this task.")
+            return redirect("core:task-detail", pk=task.pk)
+        return super().dispatch(request, *args, **kwargs)
 
 
-class TaskCompleteView(LoginRequiredMixin, generic.View):
+class TaskCompleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         task = get_object_or_404(Task, pk=kwargs["pk"])
+        if not task.can_complete(request.user):
+            messages.error(request, "You don't have permission to complete this task.")
+            return redirect("core:task-detail", pk=task.pk)
         task.is_completed = True
         task.save()
         messages.success(request, "Task marked as completed.")
         return redirect("core:task-detail", pk=task.pk)
 
 
-class TaskUncompleteView(LoginRequiredMixin, generic.View):
+class TaskUncompleteView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         task = get_object_or_404(Task, pk=kwargs["pk"])
+        if not task.can_complete(request.user):
+            messages.error(request, "You don't have permission to uncomplete this task.")
+            return redirect("core:task-detail", pk=task.pk)
         task.is_completed = False
         task.save()
         messages.success(request, "Task marked as in progress.")
@@ -165,10 +191,10 @@ class WorkerListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         workers = context["workers"]
         for worker in workers:
-            worker.active_tasks_count = worker.tasks.filter(
+            worker.active_tasks_count = worker.assigned_tasks.filter(
                 is_completed=False
             ).count()
-            worker.completed_tasks_count = worker.tasks.filter(
+            worker.completed_tasks_count = worker.assigned_tasks.filter(
                 is_completed=True
             ).count()
         return context
@@ -182,8 +208,9 @@ class WorkerDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         worker = self.get_object()
-        context["assigned_tasks"] = worker.tasks.filter(is_completed=False)
-        context["completed_tasks"] = worker.tasks.filter(is_completed=True)
+        context["assigned_tasks"] = worker.assigned_tasks.filter(is_completed=False)
+        context["completed_tasks"] = worker.assigned_tasks.filter(is_completed=True)
+        context["created_tasks"] = worker.created_tasks.all()
         return context
 
 
@@ -306,3 +333,122 @@ class LandingPageView(TemplateView):
             }
         ]
         return context
+
+
+class TeamListView(LoginRequiredMixin, ListView):
+    model = Team
+    template_name = "core/team_list.html"
+    context_object_name = "teams"
+
+    def get_queryset(self):
+        return Team.objects.filter(members=self.request.user)
+
+
+class TeamCreateView(LoginRequiredMixin, CreateView):
+    model = Team
+    template_name = "core/team_form.html"
+    fields = ["name", "description"]
+    success_url = reverse_lazy("core:team-list")
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        response = super().form_valid(form)
+        # Add creator as team member
+        TeamMember.objects.create(
+            team=form.instance,
+            member=self.request.user,
+            is_admin=True
+        )
+        return response
+
+
+class TeamDetailView(LoginRequiredMixin, DetailView):
+    model = Team
+    template_name = "core/team_detail.html"
+    context_object_name = "team"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        team = self.get_object()
+        context["members"] = team.members.all()
+        context["tasks"] = team.tasks.all()
+        # Add all users for the Add Member modal
+        context["all_users"] = Worker.objects.exclude(pk__in=team.members.values_list('pk', flat=True))
+        return context
+
+
+class TeamAddMemberView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        team = get_object_or_404(Team, pk=kwargs["pk"])
+        if not team.can_manage_members(request.user):
+            messages.error(request, "You don't have permission to add members to this team.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        user_id = request.POST.get("user_id")
+        if not user_id:
+            messages.error(request, "No user selected.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        user = get_object_or_404(Worker, pk=user_id)
+        if team.members.filter(pk=user.pk).exists():
+            messages.warning(request, "User is already a member of this team.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        TeamMember.objects.create(team=team, member=user)
+        messages.success(request, f"{user.username} has been added to the team.")
+        return redirect("core:team-detail", pk=team.pk)
+
+
+class TeamRemoveMemberView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        team = get_object_or_404(Team, pk=kwargs["pk"])
+        if not team.can_manage_members(request.user):
+            messages.error(request, "You don't have permission to remove members from this team.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        user_id = request.POST.get("user_id")
+        if not user_id:
+            messages.error(request, "No user selected.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        user = get_object_or_404(Worker, pk=user_id)
+        if not team.members.filter(pk=user.pk).exists():
+            messages.warning(request, "User is not a member of this team.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        TeamMember.objects.filter(team=team, member=user).delete()
+        messages.success(request, f"{user.username} has been removed from the team.")
+        return redirect("core:team-detail", pk=team.pk)
+
+
+class TeamTaskCreateView(LoginRequiredMixin, CreateView):
+    model = Task
+    form_class = TaskForm
+    template_name = "core/task_form.html"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        team = get_object_or_404(Team, pk=self.kwargs["pk"])
+        # Only show team members in the assigners field
+        form.fields["assigners"].queryset = team.members.all()
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Team Task'
+        return context
+
+    def form_valid(self, form):
+        team = get_object_or_404(Team, pk=self.kwargs["pk"])
+        if not team.can_manage_tasks(self.request.user):
+            messages.error(self.request, "You don't have permission to create tasks in this team.")
+            return redirect("core:team-detail", pk=team.pk)
+
+        form.instance.created_by = self.request.user
+        form.instance.team = team
+        response = super().form_valid(form)
+        messages.success(self.request, "Task created successfully.")
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy("core:team-detail", kwargs={"pk": self.kwargs["pk"]})
