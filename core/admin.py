@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskType
+from .models import Task, TaskType, Team, TeamMember
 
 
 @admin.register(TaskType)
@@ -14,3 +14,17 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ("task_type", "priority", "is_completed")
     search_fields = ("name", "description")
     filter_horizontal = ("assigners",)
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_by", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("name", "description")
+
+
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ("team", "member", "joined_at", "is_admin")
+    list_filter = ("is_admin", "joined_at")
+    search_fields = ("team__name", "member__username")
