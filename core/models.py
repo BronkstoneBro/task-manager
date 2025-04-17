@@ -19,15 +19,11 @@ class Team(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     created_by = models.ForeignKey(
-        Worker,
-        on_delete=models.CASCADE,
-        related_name='created_teams'
+        Worker, on_delete=models.CASCADE, related_name="created_teams"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     members = models.ManyToManyField(
-        Worker,
-        through='TeamMember',
-        related_name='teams'
+        Worker, through="TeamMember", related_name="teams"
     )
 
     def __str__(self):
@@ -53,7 +49,7 @@ class TeamMember(models.Model):
     is_admin = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('team', 'member')
+        unique_together = ("team", "member")
 
     def __str__(self):
         return f"{self.member} in {self.team}"
@@ -71,30 +67,20 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
-    priority = models.IntegerField(
-        choices=Priority,
-        default=Priority.LOW
-    )
+    priority = models.IntegerField(choices=Priority, default=Priority.LOW)
     task_type = models.ForeignKey(
-        TaskType,
-        on_delete=models.CASCADE,
-        related_name="tasks"
+        TaskType, on_delete=models.CASCADE, related_name="tasks"
     )
     created_by = models.ForeignKey(
-        Worker,
-        on_delete=models.CASCADE,
-        related_name="created_tasks"
+        Worker, on_delete=models.CASCADE, related_name="created_tasks"
     )
-    assigners = models.ManyToManyField(
-        Worker,
-        related_name="assigned_tasks"
-    )
+    assigners = models.ManyToManyField(Worker, related_name="assigned_tasks")
     team = models.ForeignKey(
         Team,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="tasks"
+        related_name="tasks",
     )
 
     def can_edit(self, user):
