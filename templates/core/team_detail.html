@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ team.name }}</h2>
+        <div>
+            {% if team.can_manage_members %}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                <i class="bi bi-person-plus"></i> Add Member
+            </button>
+            {% endif %}
+            <a href="{% url 'core:team-create-task' team.pk %}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Create Task
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Team Information</h5>
+                    <p class="card-text">{{ team.description }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Created by {{ team.created_by.get_full_name|default:team.created_by.username }}
+                            on {{ team.created_at|date:"Y-m-d" }}
+                        </small>
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Team Members</h5>
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                            <i class="bi bi-plus-lg"></i> Add Member
+                        </button>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for member in members %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                {{ member.get_full_name|default:member.username }}
+                                {% if member.email %}
+                                <small class="text-muted">({{ member.email }})</small>
+                                {% endif %}
+                            </div>
+                            <form method="post" action="{% url 'core:team-remove-member' team.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ member.pk }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Are you sure you want to remove this member?')">
+                                    <i class="bi bi-person-x"></i> Remove
+                                </button>
+                            </form>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted">
+                            No members yet. Add some members to get started!
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Team Tasks</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in tasks %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none">
+                                            {{ task.name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ task.get_priority_display|lower }}">
+                                            {{ task.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if task.is_completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
+                                    <td>
+                                        <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'core:task-delete' task.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No tasks yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMemberModalLabel">Add Team Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'core:team-add-member' team.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">Select User</label>
+                        <select class="form-select" id="user_id" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in all_users %}
+                            <option value="{{ user.pk }}">
+                                {{ user.get_full_name|default:user.username }}
+                                {% if user.email %}
+                                ({{ user.email }})
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Only users who are not already team members are shown in the list.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Add Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Teams</h2>
+        <a href="{% url 'core:team-create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create Team
+        </a>
+    </div>
+
+    <div class="row">
+        {% for team in teams %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ team.name }}</h5>
+                    <p class="card-text">{{ team.description|truncatechars:100 }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-primary">
+                            <i class="bi bi-people"></i> {{ team.members.count }} members
+                        </span>
+                        <span class="badge bg-secondary ms-2">
+                            <i class="bi bi-list-task"></i> {{ team.tasks.count }} tasks
+                        </span>
+                    </div>
+                    <a href="{% url 'core:team-detail' team.pk %}" class="btn btn-outline-primary">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                You are not a member of any teams yet. Create a new team or ask to be added to one.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 
