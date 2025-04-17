@@ -89,7 +89,8 @@ class Migration(migrations.Migration):
                 (
                     "assigners",
                     models.ManyToManyField(
-                        related_name="assigned_tasks", to=settings.AUTH_USER_MODEL
+                        related_name="assigned_tasks",
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
@@ -152,7 +153,8 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="core.team"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.team",
                     ),
                 ),
             ],
