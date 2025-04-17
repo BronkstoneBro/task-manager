@@ -61,8 +61,22 @@ urlpatterns = [
     # Team URLs
     path("teams/", views.TeamListView.as_view(), name="team-list"),
     path("teams/create/", views.TeamCreateView.as_view(), name="team-create"),
-    path("teams/<int:pk>/", views.TeamDetailView.as_view(), name="team-detail"),
-    path("teams/<int:pk>/add-member/", views.TeamAddMemberView.as_view(), name="team-add-member"),
-    path("teams/<int:pk>/remove-member/", views.TeamRemoveMemberView.as_view(), name="team-remove-member"),
-    path("teams/<int:pk>/create-task/", views.TeamTaskCreateView.as_view(), name="team-create-task"),
+    path(
+        "teams/<int:pk>/", views.TeamDetailView.as_view(), name="team-detail"
+    ),
+    path(
+        "teams/<int:pk>/add-member/",
+        views.TeamAddMemberView.as_view(),
+        name="team-add-member",
+    ),
+    path(
+        "teams/<int:pk>/remove-member/",
+        views.TeamRemoveMemberView.as_view(),
+        name="team-remove-member",
+    ),
+    path(
+        "teams/<int:pk>/create-task/",
+        views.TeamTaskCreateView.as_view(),
+        name="team-create-task",
+    ),
 ]
