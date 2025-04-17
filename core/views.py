@@ -51,9 +51,7 @@ class TaskListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = Task.objects.filter(
-            team__isnull=True
-        )  # Only show non-team tasks
+        queryset = Task.objects.filter(team__isnull=True)
         search_query = self.request.GET.get("search", "")
 
         if search_query:
@@ -78,7 +76,6 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         task = super().get_object(queryset)
-        # Check if task is a team task and user is not a member
         if (
             task.team
             and not task.team.members.filter(pk=self.request.user.pk).exists()
@@ -305,7 +302,6 @@ class CustomLoginView(LoginView):
     authentication_form = AuthenticationForm
 
     def form_invalid(self, form):
-        # Let the form handle its own errors
         return self.render_to_response(self.get_context_data(form=form))
 
     def form_valid(self, form):
