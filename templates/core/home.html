@@ -38,7 +38,7 @@
                             {% for task in tasks %}
                                 <tr class="{% if task.is_completed %}table-light{% endif %}">
                                     <td class="ps-4">
-                                        <a href="{% url 'core:task-detail' pk=task.pk %}" class="text-decoration-none fw-medium">
+                                        <a href="{% url 'core:task-detail' pk=task.pk %}" class="text-decoration-none fw-bold text-dark hover-primary">
                                             {{ task.name }}
                                         </a>
                                         {% if task.description %}

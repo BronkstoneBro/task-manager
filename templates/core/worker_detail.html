@@ -90,7 +90,7 @@
                             {% for task in assigned_tasks %}
                                 <tr>
                                     <td class="ps-4">
-                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-medium">
+                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-bold text-dark hover-primary">
                                             {{ task.name }}
                                         </a>
                                     </td>
@@ -157,7 +157,7 @@
                             {% for task in completed_tasks %}
                                 <tr>
                                     <td class="ps-4">
-                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-medium">
+                                        <a href="{% url 'core:task-detail' task.pk %}" class="text-decoration-none fw-bold text-dark hover-primary">
                                             {{ task.name }}
                                         </a>
                                     </td>
