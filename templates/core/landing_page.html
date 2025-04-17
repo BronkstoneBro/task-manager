@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Task Manager - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero py-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-normal mb-4">Task Manager</h1>
+                <p class="lead text-muted mb-4">Simple and efficient task management for your team.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'core:task-list' %}" class="btn btn-outline-dark">View Tasks</a>
+                    {% else %}
+                        <a href="{% url 'core:login' %}" class="btn btn-outline-dark">Get Started</a>
+                        <a href="{% url 'core:register' %}" class="btn btn-dark">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="h4 text-center mb-5">Features</h2>
+        <div class="row g-4">
+            {% for feature in features %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="{{ feature.icon }} text-dark"></i>
+                        </div>
+                        <h3 class="h5 mb-2">{{ feature.title }}</h3>
+                        <p class="text-muted small mb-0">{{ feature.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 border-top">
+    <div class="container text-center">
+        <h2 class="h4 mb-3">Ready to Get Started?</h2>
+        <p class="text-muted mb-4">Start managing your tasks today.</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'core:task-list' %}" class="btn btn-dark">View Your Tasks</a>
+        {% else %}
+            <a href="{% url 'core:register' %}" class="btn btn-dark">Create Account</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-4 border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <p class="text-muted small mb-0">&copy; 2024 Task Manager</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="#" class="text-muted small me-3">Privacy</a>
+                <a href="#" class="text-muted small">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background-color: #ffffff;
+    }
+    
+    .card {
+        background-color: transparent;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+    
+    .btn {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .card:hover {
+        background-color: #ffffff;
+    }
+</style>
+{% endblock %} 

@@ -5,7 +5,8 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="core:task-list"), name="home"),
+    path("", views.LandingPageView.as_view(), name="landing"),
+    path("home/", views.HomeView.as_view(), name="home"),
     path("tasks/", views.TaskListView.as_view(), name="task-list"),
     path("task/create/", views.TaskCreateView.as_view(), name="task-create"),
     path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"),
