@@ -17,6 +17,10 @@
             <i class="fas fa-check"></i> Mark as Completed
           </button>
         </form>
+      {% else %}
+        <a href="{% url 'core:task-uncomplete' task.pk %}" class="btn btn-warning">
+          <i class="bi bi-arrow-counterclockwise"></i> Mark as In Progress
+        </a>
       {% endif %}
     </div>
   </div>

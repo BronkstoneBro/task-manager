@@ -26,6 +26,11 @@ urlpatterns = [
         name="task-complete",
     ),
     path(
+        "task/<int:pk>/uncomplete/",
+        views.TaskUncompleteView.as_view(),
+        name="task-uncomplete",
+    ),
+    path(
         "task-types/", views.TaskTypeListView.as_view(), name="task-type-list"
     ),
     path(
