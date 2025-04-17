@@ -5,62 +5,80 @@
 
 {% block content %}
 <div class="container py-4">
+    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Your Tasks</h1>
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="fas fa-tasks text-primary me-2"></i>Your Tasks
+            </h1>
+            <p class="text-muted mb-0">View and manage your assigned tasks</p>
+        </div>
         <a href="{% url 'core:task-create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Task
+            <i class="fas fa-plus me-2"></i>Create Task
         </a>
     </div>
 
     <!-- Tasks List -->
-    <div class="card">
-        <div class="card-body">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
             {% if tasks %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
                             <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Priority</th>
-                                <th>Deadline</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th class="border-0">Name</th>
+                                <th class="border-0">Type</th>
+                                <th class="border-0">Priority</th>
+                                <th class="border-0">Deadline</th>
+                                <th class="border-0">Status</th>
+                                <th class="border-0 text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for task in tasks %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'core:task-detail' pk=task.pk %}" class="text-decoration-none">
+                                        <a href="{% url 'core:task-detail' pk=task.pk %}" class="text-decoration-none fw-medium">
                                             {{ task.name }}
                                         </a>
                                     </td>
-                                    <td>{{ task.task_type }}</td>
                                     <td>
-                                        <span class="badge {% if task.priority == 1 %}bg-danger{% elif task.priority == 2 %}bg-warning{% elif task.priority == 3 %}bg-info{% else %}bg-secondary{% endif %}">
-                                            {{ task.get_priority_display }}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-tag me-1"></i>{{ task.task_type }}
                                         </span>
                                     </td>
-                                    <td>{{ task.deadline|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <span class="badge {% if task.priority == 1 %}bg-danger{% elif task.priority == 2 %}bg-warning{% elif task.priority == 3 %}bg-info{% else %}bg-secondary{% endif %}">
+                                            <i class="fas fa-flag me-1"></i>{{ task.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <i class="far fa-calendar-alt me-1"></i>{{ task.deadline|date:"Y-m-d H:i" }}
+                                        </span>
+                                    </td>
                                     <td>
                                         {% if task.is_completed %}
-                                            <span class="badge bg-success">Completed</span>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Completed
+                                            </span>
                                         {% else %}
-                                            <span class="badge bg-primary">In Progress</span>
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-clock me-1"></i>In Progress
+                                            </span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             {% if not task.is_completed %}
-                                                <a href="{% url 'core:task-complete' pk=task.pk %}" class="btn btn-sm btn-outline-success">
+                                                <a href="{% url 'core:task-complete' pk=task.pk %}" class="btn btn-sm btn-outline-success" title="Complete">
                                                     <i class="fas fa-check"></i>
                                                 </a>
                                             {% endif %}
-                                            <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </div>
@@ -73,17 +91,17 @@
 
                 <!-- Pagination -->
                 {% if is_paginated %}
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center">
+                    <nav aria-label="Page navigation" class="mt-4 px-4">
+                        <ul class="pagination justify-content-center mb-0">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
                                     <a class="page-link" href="?page=1" aria-label="First">
-                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                        <i class="fas fa-angle-double-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
+                                        <i class="fas fa-angle-left"></i>
                                     </a>
                                 </li>
                             {% endif %}
@@ -103,12 +121,12 @@
                             {% if page_obj.has_next %}
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
+                                        <i class="fas fa-angle-right"></i>
                                     </a>
                                 </li>
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                        <i class="fas fa-angle-double-right"></i>
                                     </a>
                                 </li>
                             {% endif %}
@@ -116,9 +134,15 @@
                     </nav>
                 {% endif %}
             {% else %}
-                <div class="text-center py-4">
-                    <p class="text-muted">No tasks found.</p>
-                    <a href="{% url 'core:task-create' %}" class="btn btn-primary">Create Your First Task</a>
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-tasks fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">No tasks found</h5>
+                    <p class="text-muted mb-4">Get started by creating your first task</p>
+                    <a href="{% url 'core:task-create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Task
+                    </a>
                 </div>
             {% endif %}
         </div>
