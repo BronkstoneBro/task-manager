@@ -1,70 +1,122 @@
 {% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Your Tasks{% endblock %}
 
 {% block content %}
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Your Tasks</h2>
-    <a href="{% url 'core:task-create' %}" class="btn btn-primary">
-      <i class="fas fa-plus"></i> New Task
-    </a>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-          <tr>
-            <th>Task</th>
-            <th>Type</th>
-            <th>Priority</th>
-            <th>Deadline</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          {% for task in tasks %}
-            <tr>
-              <td>
-                <a href="{% url 'core:task-detail' task.pk %}">{{ task.name }}</a>
-              </td>
-              <td>{{ task.task_type }}</td>
-              <td>
-                            <span
-                                class="badge bg-{% if task.priority == 1 %}danger{% elif task.priority == 2 %}warning{% elif task.priority == 3 %}info{% else %}secondary{% endif %}">
-                                {{ task.get_priority_display }}
-                            </span>
-              </td>
-              <td>{{ task.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
-              <td>
-                {% if task.is_completed %}
-                  <span class="badge bg-success">Completed</span>
-                {% else %}
-                  <span class="badge bg-warning">In Progress</span>
-                {% endif %}
-              </td>
-              <td>
-                <a href="{% url 'core:task-detail' task.pk %}" class="btn btn-sm btn-info">
-                  <i class="fas fa-eye"></i>
-                </a>
-                <a href="{% url 'core:task-update' task.pk %}" class="btn btn-sm btn-primary">
-                  <i class="fas fa-edit"></i>
-                </a>
-                {% if not task.is_completed %}
-                  <a href="{% url 'core:task-complete' task.pk %}" class="btn btn-sm btn-success">
-                    <i class="fas fa-check"></i>
-                  </a>
-                {% endif %}
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="6" class="text-center">No tasks assigned to you.</td>
-            </tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Your Tasks</h1>
+        <a href="{% url 'core:task-create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Task
+        </a>
     </div>
-  </div>
+
+    <!-- Tasks List -->
+    <div class="card">
+        <div class="card-body">
+            {% if tasks %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Deadline</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'core:task-detail' pk=task.pk %}" class="text-decoration-none">
+                                            {{ task.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ task.task_type }}</td>
+                                    <td>
+                                        <span class="badge {% if task.priority == 1 %}bg-danger{% elif task.priority == 2 %}bg-warning{% elif task.priority == 3 %}bg-info{% else %}bg-secondary{% endif %}">
+                                            {{ task.get_priority_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ task.deadline|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        {% if task.is_completed %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted">No tasks found.</p>
+                    <a href="{% url 'core:task-create' %}" class="btn btn-primary">Create Your First Task</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %} 
