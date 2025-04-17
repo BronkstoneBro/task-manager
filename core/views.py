@@ -136,6 +136,18 @@ class TaskCompleteView(LoginRequiredMixin, generic.View):
         return redirect("core:task-detail", pk=task.pk)
 
 
+class TaskUncompleteView(LoginRequiredMixin, generic.View):
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        task = get_object_or_404(Task, pk=kwargs["pk"])
+        task.is_completed = False
+        task.save()
+        messages.success(request, "Task marked as in progress.")
+        return redirect("core:task-detail", pk=task.pk)
+
+
 def mark_task_completed(request, pk):
     task = get_object_or_404(Task, pk=pk)
     task.is_completed = True
