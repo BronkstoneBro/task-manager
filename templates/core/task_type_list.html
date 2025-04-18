@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Task Types{% endblock %}
+
+{% block content %}
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3 mb-1">
+          <i class="fas fa-tags text-dark me-2"></i>Task Types
+        </h1>
+        <p class="text-muted mb-0">Manage task categories and classifications</p>
+      </div>
+      <a href="{% url 'core:task-type-create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>New Task Type
+      </a>
+    </div>
+
+
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        {% if task_types %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+              <tr>
+                <th class="border-0 ps-4">Name</th>
+                <th class="border-0">Usage</th>
+                <th class="border-0 pe-4 text-end">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for task_type in task_types %}
+                <tr>
+                  <td class="ps-4">
+                                        <span class="fw-medium">
+                                            <i class="fas fa-tag text-muted me-2"></i>{{ task_type.name }}
+                                        </span>
+                  </td>
+                  <td>
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-tasks me-1"></i>{{ task_type.tasks.count }} tasks
+                                        </span>
+                  </td>
+                  <td class="pe-4">
+                    <div class="btn-group">
+                      <a href="{% url 'core:task-type-update' task_type.pk %}" class="btn btn-sm btn-outline-primary"
+                         title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="{% url 'core:task-type-delete' task_type.pk %}" class="btn btn-sm btn-outline-danger"
+                         title="Delete">
+                        <i class="fas fa-trash"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="fas fa-tags fa-3x text-muted"></i>
+            </div>
+            <h5 class="text-muted mb-2">No task types found</h5>
+            <p class="text-muted mb-4">Get started by creating your first task type</p>
+            <a href="{% url 'core:task-type-create' %}" class="btn btn-primary">
+              <i class="fas fa-plus me-2"></i>Create Task Type
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %} 
