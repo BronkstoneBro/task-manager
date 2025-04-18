@@ -4,6 +4,7 @@
 {% block title %}Task Manager - Home{% endblock %}
 
 {% block content %}
+  <link rel="stylesheet" href="{% static 'css/landing_page.css' %}">
 
   <section class="hero py-5">
     <div class="container">
@@ -23,7 +24,6 @@
       </div>
     </div>
   </section>
-
 
   <section class="py-5">
     <div class="container">
@@ -45,7 +45,6 @@
       </div>
     </div>
   </section>
-
 
   <section class="py-5 border-top">
     <div class="container text-center">
@@ -74,25 +73,3 @@
     </div>
   </footer>
 {% endblock %}
-
-{% block extra_css %}
-  <style>
-      .hero {
-          background-color: #ffffff;
-      }
-
-      .card {
-          background-color: transparent;
-          border: 1px solid rgba(0, 0, 0, 0.05) !important;
-      }
-
-      .btn {
-          padding: 0.5rem 1.5rem;
-          font-size: 0.9rem;
-      }
-
-      .card:hover {
-          background-color: #ffffff;
-      }
-  </style>
-{% endblock %} 
