@@ -29,7 +29,7 @@
                                 <li><a class="dropdown-item" href="{% url 'core:worker-detail' user.pk %}">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'core:logout' %}" class="d-inline">
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
                                         {% csrf_token %}
                                         <button type="submit" class="dropdown-item">
                                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -42,10 +42,10 @@
                 {% else %}
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'core:login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'core:register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
                         </li>
                     </ul>
                 {% endif %}

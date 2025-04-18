@@ -1,6 +1,5 @@
 from django.urls import path
-from django.views.generic import RedirectView
-from core import views
+from . import views
 
 app_name = "core"
 
@@ -79,22 +78,6 @@ urlpatterns = [
         "workers/<int:pk>/",
         views.WorkerDetailView.as_view(),
         name="worker-detail",
-    ),
-    # Authentication
-    path(
-        "login/",
-        views.CustomLoginView.as_view(),
-        name="login",
-    ),
-    path(
-        "logout/",
-        views.CustomLogoutView.as_view(),
-        name="logout",
-    ),
-    path(
-        "register/",
-        views.RegisterView.as_view(),
-        name="register",
     ),
     # Team URLs
     path(
