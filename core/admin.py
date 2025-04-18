@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskType, Team, TeamMember
+from core.models import Task, TaskType, Team, TeamMember
 
 
 @admin.register(TaskType)

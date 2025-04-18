@@ -1,26 +1,26 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse_lazy
-from django.views import generic
-from django.views.generic import (
-    ListView,
-    DetailView,
-    CreateView,
-    UpdateView,
-    DeleteView,
-    TemplateView,
-    View,
-)
-from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib import messages
-from django.utils import timezone
 from django import forms
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, LogoutView
 from django.db.models import Q
 from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views import generic
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    View,
+)
 
-from .models import Task, TaskType, Team, TeamMember
+from core.models import Task, TaskType, Team, TeamMember
 
 Worker = get_user_model()
 
@@ -34,13 +34,10 @@ class HomeView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         assigned_tasks = Task.objects.filter(assigners=self.request.user)
-
         team_tasks = Task.objects.filter(
             team__members=self.request.user, team__isnull=False
         )
-
         queryset = (assigned_tasks | team_tasks).distinct()
-
         return queryset.order_by("is_completed", "deadline", "priority")
 
 

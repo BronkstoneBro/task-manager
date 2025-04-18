@@ -4,34 +4,34 @@
 {% block title %}{% if form.instance.pk %}Edit Task Type{% else %}Create New Task Type{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+  <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-tags text-dark me-2"></i>
-                    {% if form.instance.pk %}Edit Task Type{% else %}Create New Task Type{% endif %}
-                </h1>
-                <a href="{% url 'core:task-type-list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Task Types
-                </a>
-            </div>
-
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-save text-dark me-2"></i>
-                                {% if form.instance.pk %}Update{% else %}Create{% endif %} Task Type
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1 class="h3 mb-0">
+            <i class="fas fa-tags text-dark me-2"></i>
+            {% if form.instance.pk %}Edit Task Type{% else %}Create New Task Type{% endif %}
+          </h1>
+          <a href="{% url 'core:task-type-list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Task Types
+          </a>
         </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form method="post">
+              {% csrf_token %}
+              {{ form|crispy }}
+              <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="fas fa-save text-dark me-2"></i>
+                  {% if form.instance.pk %}Update{% else %}Create{% endif %} Task Type
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock %} 
