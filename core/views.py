@@ -102,7 +102,11 @@ class TaskForm(forms.ModelForm):
         ]
         widgets = {
             "deadline": forms.DateTimeInput(
-                attrs={"type": "datetime-local", "class": "form-control"}
+                attrs={
+                    "type": "datetime-local",
+                    "class": "form-control",
+                    "min": timezone.now().strftime("%Y-%m-%dT%H:%M")
+                }
             ),
             "assigners": forms.SelectMultiple(
                 attrs={
@@ -112,6 +116,21 @@ class TaskForm(forms.ModelForm):
                 }
             ),
         }
+
+    def clean_deadline(self):
+        deadline = self.cleaned_data.get('deadline')
+        if deadline and deadline < timezone.now():
+            raise forms.ValidationError("The deadline cannot be in the past. Please select a future date and time.")
+        return deadline
+
+    def clean(self):
+        cleaned_data = super().clean()
+        deadline = cleaned_data.get('deadline')
+        
+        if deadline and deadline < timezone.now():
+            self.add_error('deadline', "The deadline cannot be in the past. Please select a future date and time.")
+        
+        return cleaned_data
 
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
@@ -127,15 +146,9 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
 
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
+    form_class = TaskForm
     template_name = "core/task_form.html"
-    fields = [
-        "name",
-        "description",
-        "deadline",
-        "priority",
-        "task_type",
-        "assigners",
-    ]
+    success_url = reverse_lazy("core:task-list")
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -153,20 +166,38 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
 
+    def form_valid(self, form):
+        messages.success(self.request, "Task updated successfully.")
+        return super().form_valid(form)
+
 
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
     template_name = "core/task_confirm_delete.html"
     success_url = reverse_lazy("core:task-list")
 
+    def get_object(self, queryset=None):
+        try:
+            return super().get_object(queryset)
+        except Http404:
+            messages.error(self.request, "The task you are trying to delete does not exist.")
+            return None
+
     def dispatch(self, request, *args, **kwargs):
         task = self.get_object()
+        if not task:
+            return redirect("core:task-list")
         if not task.can_delete(request.user):
             messages.error(
                 request, "You don't have permission to delete this task."
             )
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        task = self.get_object()
+        messages.success(request, f'Task "{task.name}" has been deleted successfully.')
+        return super().delete(request, *args, **kwargs)
 
 
 class TaskCompleteView(LoginRequiredMixin, View):
