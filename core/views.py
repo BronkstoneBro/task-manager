@@ -62,6 +62,13 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        tasks = context.get("tasks")
+        # Annotate each task with permission flags for template logic
+        if tasks:
+            for task in tasks:
+                task.can_edit_perm = task.can_edit(self.request.user)
+                task.can_delete_perm = task.can_delete(self.request.user)
+                task.can_complete_perm = task.can_complete(self.request.user)
         context["search_query"] = self.request.GET.get("search", "")
         return context
 

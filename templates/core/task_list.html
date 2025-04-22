@@ -106,22 +106,27 @@
                     {% endif %}
                   </td>
                   <td class="pe-4">
-                    <div class="btn-group">
-                      <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary"
-                         title="Edit">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                      {% if not task.is_completed %}
-                        <a href="{% url 'core:task-complete' pk=task.pk %}" class="btn btn-sm btn-outline-success"
-                           title="Complete">
-                          <i class="fas fa-check"></i>
-                        </a>
-                      {% endif %}
-                      <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger"
-                         title="Delete">
-                        <i class="fas fa-trash"></i>
-                      </a>
-                    </div>
+                    {% if task.can_edit_perm or task.can_complete_perm or task.can_delete_perm %}
+                      <div class="btn-group">
+                        {% if task.can_edit_perm %}
+                          <a href="{% url 'core:task-update' pk=task.pk %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                        {% endif %}
+                        {% if task.can_complete_perm and not task.is_completed %}
+                          <a href="{% url 'core:task-complete' pk=task.pk %}" class="btn btn-sm btn-outline-success" title="Complete">
+                            <i class="fas fa-check"></i>
+                          </a>
+                        {% endif %}
+                        {% if task.can_delete_perm %}
+                          <a href="{% url 'core:task-delete' pk=task.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                            <i class="fas fa-trash"></i>
+                          </a>
+                        {% endif %}
+                      </div>
+                    {% else %}
+                      <span class="text-muted small"><i class="fas fa-exclamation-circle me-1"></i> No Actions Available</span>
+                    {% endif %}
                   </td>
                 </tr>
               {% endfor %}
