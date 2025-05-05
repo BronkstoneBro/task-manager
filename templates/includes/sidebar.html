@@ -1,0 +1,25 @@
+<ul class="navbar-nav me-auto">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'core:home' %}">My Tasks</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'core:task-list' %}">All Tasks</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'core:task-create' %}">Create Task</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'core:task-type-list' %}">Task Types</a>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="teamsDropdown" role="button" data-bs-toggle="dropdown">
+            Teams
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'core:team-list' %}">My Teams</a></li>
+            <li><a class="dropdown-item" href="{% url 'core:team-create' %}">Create Team</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'core:worker-list' %}">All Members</a></li>
+        </ul>
+    </li>
+</ul>

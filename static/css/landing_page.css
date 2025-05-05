@@ -1,0 +1,17 @@
+.hero {
+    background-color: #ffffff;
+}
+
+.card {
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+}
+
+.card:hover {
+    background-color: #ffffff;
+}
