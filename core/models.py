@@ -108,3 +108,20 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.task_type})"
+
+
+class TaskFile(models.Model):
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="files"
+    )
+    file = models.FileField(upload_to="task_files/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(
+        Worker, on_delete=models.CASCADE, related_name="task_files"
+    )
+
+    def __str__(self):
+        return f"File for {self.task.name} uploaded by {self.uploaded_by.username}"
+
+    class Meta:
+        ordering = ["-uploaded_at"]
