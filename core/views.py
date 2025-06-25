@@ -20,7 +20,7 @@ from django.views.generic import (
     View,
 )
 from core.features import FEATURES
-from core.models import Task, TaskType, Team, TeamMember
+from core.models import Task, TaskFile, TaskType, Team, TeamMember
 
 Worker = get_user_model()
 
@@ -94,6 +94,24 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         context["can_delete"] = task.can_delete(self.request.user)
         context["can_complete"] = task.can_complete(self.request.user)
         return context
+
+    def post(self, request, *args, **kwargs):
+        task = self.get_object()
+        files = request.FILES.getlist("files")
+
+        if not files:
+            messages.warning(request, "You didn't select any files to upload.")
+            return redirect("core:task-detail", pk=task.pk)
+
+        for file in files:
+            TaskFile.objects.create(
+                task=task, file=file, uploaded_by=request.user
+            )
+
+        messages.success(
+            request, f"{len(files)} file(s) uploaded successfully."
+        )
+        return redirect("core:task-detail", pk=task.pk)
 
 
 class TaskForm(forms.ModelForm):
