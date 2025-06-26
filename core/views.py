@@ -63,7 +63,6 @@ class TaskListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tasks = context.get("tasks")
-        # Annotate each task with permission flags for template logic
         if tasks:
             for task in tasks:
                 task.can_edit_perm = task.can_edit(self.request.user)
@@ -129,7 +128,6 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
                 request, f"{len(files)} file(s) uploaded successfully."
             )
             return redirect("core:task-detail", pk=task.pk)
-        # Handle comment form
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             comment = comment_form.save(commit=False)
