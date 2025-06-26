@@ -20,7 +20,7 @@ from django.views.generic import (
     View,
 )
 from core.features import FEATURES
-from core.models import Task, TaskFile, TaskType, Team, TeamMember
+from core.models import Task, TaskFile, TaskType, Team, TeamMember, Comment
 
 Worker = get_user_model()
 
@@ -73,6 +73,21 @@ class TaskListView(LoginRequiredMixin, ListView):
         return context
 
 
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["text"]
+        widgets = {
+            "text": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 2,
+                    "placeholder": "Add a comment...",
+                }
+            )
+        }
+
+
 class TaskDetailView(LoginRequiredMixin, DetailView):
     model = Task
     template_name = "core/task_detail.html"
@@ -93,25 +108,39 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         context["can_edit"] = task.can_edit(self.request.user)
         context["can_delete"] = task.can_delete(self.request.user)
         context["can_complete"] = task.can_complete(self.request.user)
+        context["comments"] = task.comments.select_related("author").all()
+        context["comment_form"] = CommentForm()
         return context
 
     def post(self, request, *args, **kwargs):
         task = self.get_object()
-        files = request.FILES.getlist("files")
-
-        if not files:
-            messages.warning(request, "You didn't select any files to upload.")
-            return redirect("core:task-detail", pk=task.pk)
-
-        for file in files:
-            TaskFile.objects.create(
-                task=task, file=file, uploaded_by=request.user
+        if "files" in request.FILES:
+            files = request.FILES.getlist("files")
+            if not files:
+                messages.warning(
+                    request, "You didn't select any files to upload."
+                )
+                return redirect("core:task-detail", pk=task.pk)
+            for file in files:
+                TaskFile.objects.create(
+                    task=task, file=file, uploaded_by=request.user
+                )
+            messages.success(
+                request, f"{len(files)} file(s) uploaded successfully."
             )
-
-        messages.success(
-            request, f"{len(files)} file(s) uploaded successfully."
-        )
-        return redirect("core:task-detail", pk=task.pk)
+            return redirect("core:task-detail", pk=task.pk)
+        # Handle comment form
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.task = task
+            comment.author = request.user
+            comment.save()
+            messages.success(request, "Comment added.")
+            return redirect("core:task-detail", pk=task.pk)
+        context = self.get_context_data()
+        context["comment_form"] = comment_form
+        return self.render_to_response(context)
 
 
 class TaskForm(forms.ModelForm):
@@ -130,7 +159,7 @@ class TaskForm(forms.ModelForm):
                 attrs={
                     "type": "datetime-local",
                     "class": "form-control",
-                    "min": timezone.now().strftime("%Y-%m-%dT%H:%M")
+                    "min": timezone.now().strftime("%Y-%m-%dT%H:%M"),
                 }
             ),
             "assigners": forms.SelectMultiple(
@@ -143,18 +172,23 @@ class TaskForm(forms.ModelForm):
         }
 
     def clean_deadline(self):
-        deadline = self.cleaned_data.get('deadline')
+        deadline = self.cleaned_data.get("deadline")
         if deadline and deadline < timezone.now():
-            raise forms.ValidationError("The deadline cannot be in the past. Please select a future date and time.")
+            raise forms.ValidationError(
+                "The deadline cannot be in the past. Please select a future date and time."
+            )
         return deadline
 
     def clean(self):
         cleaned_data = super().clean()
-        deadline = cleaned_data.get('deadline')
-        
+        deadline = cleaned_data.get("deadline")
+
         if deadline and deadline < timezone.now():
-            self.add_error('deadline', "The deadline cannot be in the past. Please select a future date and time.")
-        
+            self.add_error(
+                "deadline",
+                "The deadline cannot be in the past. Please select a future date and time.",
+            )
+
         return cleaned_data
 
 
@@ -205,7 +239,10 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
         try:
             return super().get_object(queryset)
         except Http404:
-            messages.error(self.request, "The task you are trying to delete does not exist.")
+            messages.error(
+                self.request,
+                "The task you are trying to delete does not exist.",
+            )
             return None
 
     def dispatch(self, request, *args, **kwargs):
@@ -221,7 +258,9 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         task = self.get_object()
-        messages.success(request, f'Task "{task.name}" has been deleted successfully.')
+        messages.success(
+            request, f'Task "{task.name}" has been deleted successfully.'
+        )
         return super().delete(request, *args, **kwargs)
 
 
