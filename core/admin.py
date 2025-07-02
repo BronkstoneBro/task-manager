@@ -1,5 +1,5 @@
 from django.contrib import admin
-from core.models import Task, TaskType, Team, TeamMember, Comment
+from core.models import Task, TaskType, Team, TeamMember, Comment, TaskLog
 
 
 @admin.register(TaskType)
@@ -40,3 +40,6 @@ class TeamMemberAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("task", "author", "created_at", "text")
     search_fields = ("text", "author__username", "task__name")
+
+
+admin.site.register(TaskLog)

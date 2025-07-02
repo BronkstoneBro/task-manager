@@ -129,8 +129,14 @@ class TaskFile(models.Model):
 
 
 class Comment(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="comments"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -139,3 +145,35 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.task}"
+
+
+class TaskLog(models.Model):
+    class ActionType(models.TextChoices):
+        UPDATE = "update", "Update"
+        COMMENT = "comment", "Comment"
+        FILE = "file", "File"
+        COMPLETE = "complete", "Complete"
+        UNCOMPLETE = "uncomplete", "Uncomplete"
+
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name="logs"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    action = models.CharField(max_length=16, choices=ActionType.choices)
+    field = models.CharField(max_length=64, blank=True)
+    old_value = models.TextField(blank=True)
+    new_value = models.TextField(blank=True)
+    message = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+
+    def __str__(self):
+        return self.message or f"{self.get_action_display()} {self.field} of task {self.task_id} by user {self.user_id} at {self.timestamp}"
