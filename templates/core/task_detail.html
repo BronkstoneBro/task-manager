@@ -116,6 +116,26 @@
             </ul>
           </div>
         </div>
+        <div class="card mt-4">
+          <div class="card-body">
+            <h5 class="card-title">Change history</h5>
+            {% if logs %}
+              <ul class="list-group list-group-flush">
+                {% for log in logs %}
+                  <li class="list-group-item">
+                    <small class="text-muted">{{ log.timestamp|date:"Y-m-d H:i" }}</small><br>
+                    <strong>{{ log.get_action_display }}</strong>
+                    {% if log.field %} <span>({{ log.field }})</span>{% endif %}
+                    {% if log.old_value %}<br><span class="text-muted">Old value: {{ log.old_value }}</span>{% endif %}
+                    <br>User: {{ log.user.get_full_name|default:log.user.username|default:"Anonymous" }}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted">No change history.</p>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
   </div>

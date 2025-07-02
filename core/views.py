@@ -20,7 +20,7 @@ from django.views.generic import (
     View,
 )
 from core.features import FEATURES
-from core.models import Task, TaskFile, TaskType, Team, TeamMember, Comment
+from core.models import Task, TaskFile, TaskType, Team, TeamMember, Comment, TaskLog
 
 Worker = get_user_model()
 
@@ -109,6 +109,8 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         context["can_complete"] = task.can_complete(self.request.user)
         context["comments"] = task.comments.select_related("author").all()
         context["comment_form"] = CommentForm()
+
+        context["logs"] = task.logs.select_related("user").all()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -124,6 +126,16 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
                 TaskFile.objects.create(
                     task=task, file=file, uploaded_by=request.user
                 )
+                msg = f"User {request.user.get_username()} attached file '{file.name}'"
+                log_task_action(
+                    task,
+                    request.user,
+                    TaskLog.ActionType.FILE,
+                    field="file",
+                    new_value=file.name,
+                    message=msg,
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                )
             messages.success(
                 request, f"{len(files)} file(s) uploaded successfully."
             )
@@ -134,6 +146,16 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
             comment.task = task
             comment.author = request.user
             comment.save()
+            msg = f"User {request.user.get_username()} added a comment"
+            log_task_action(
+                task,
+                request.user,
+                TaskLog.ActionType.COMMENT,
+                field="comment",
+                new_value=comment.text,
+                message=msg,
+                ip_address=request.META.get('REMOTE_ADDR'),
+            )
             messages.success(request, "Comment added.")
             return redirect("core:task-detail", pk=task.pk)
         context = self.get_context_data()
@@ -224,6 +246,26 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        task = self.get_object()
+        key_fields = ["name", "description", "deadline", "priority", "task_type", "assigners"]
+        for field in key_fields:
+            old_value = getattr(task, field)
+            new_value = form.cleaned_data.get(field)
+            if field == "assigners":
+                old_value = list(task.assigners.values_list("id", flat=True))
+                new_value = list(new_value.values_list("id", flat=True)) if new_value else []
+            if old_value != new_value:
+                msg = f"User {self.request.user.get_username()} updated {field} from '{old_value}' to '{new_value}'"
+                log_task_action(
+                    task,
+                    self.request.user,
+                    TaskLog.ActionType.UPDATE,
+                    field=field,
+                    old_value=str(old_value),
+                    new_value=str(new_value),
+                    message=msg,
+                    ip_address=self.request.META.get('REMOTE_ADDR'),
+                )
         messages.success(self.request, "Task updated successfully.")
         return super().form_valid(form)
 
@@ -525,3 +567,16 @@ class TeamTaskCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy(
             "core:team-detail", kwargs={"pk": self.kwargs["pk"]}
         )
+
+
+def log_task_action(task, user, action, field='', old_value='', new_value='', message='', ip_address=None):
+    TaskLog.objects.create(
+        task=task,
+        user=user,
+        action=action,
+        field=field,
+        old_value=old_value,
+        new_value=new_value,
+        message=message,
+        ip_address=ip_address,
+    )
