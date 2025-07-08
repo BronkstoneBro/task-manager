@@ -39,7 +39,5 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("accounts:login")
 
     def form_valid(self, form):
-        messages.success(
-            self.request, "Account created successfully. Please log in."
-        )
+        messages.success(self.request, "Account created successfully. Please log in.")
         return super().form_valid(form)
