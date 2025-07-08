@@ -40,9 +40,7 @@ class ViewTests(TestCase):
 
     def test_task_detail_view(self):
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(
-            reverse("core:task-detail", args=[self.task.pk])
-        )
+        response = self.client.get(reverse("core:task-detail", args=[self.task.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "core/task_detail.html")
 
@@ -66,8 +64,6 @@ class ViewTests(TestCase):
 
     def test_team_detail_view(self):
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(
-            reverse("core:team-detail", args=[self.team.pk])
-        )
+        response = self.client.get(reverse("core:team-detail", args=[self.team.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "core/team_detail.html")

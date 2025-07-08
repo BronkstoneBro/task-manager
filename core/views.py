@@ -94,10 +94,7 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         task = super().get_object(queryset)
-        if (
-            task.team
-            and not task.team.members.filter(pk=self.request.user.pk).exists()
-        ):
+        if task.team and not task.team.members.filter(pk=self.request.user.pk).exists():
             raise Http404("You don't have permission to view this task.")
         return task
 
@@ -118,14 +115,10 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         if "files" in request.FILES:
             files = request.FILES.getlist("files")
             if not files:
-                messages.warning(
-                    request, "You didn't select any files to upload."
-                )
+                messages.warning(request, "You didn't select any files to upload.")
                 return redirect("core:task-detail", pk=task.pk)
             for file in files:
-                TaskFile.objects.create(
-                    task=task, file=file, uploaded_by=request.user
-                )
+                TaskFile.objects.create(task=task, file=file, uploaded_by=request.user)
                 msg = f"User {request.user.get_username()} attached file '{file.name}'"
                 log_task_action(
                     task,
@@ -134,11 +127,9 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
                     field="file",
                     new_value=file.name,
                     message=msg,
-                    ip_address=request.META.get('REMOTE_ADDR'),
+                    ip_address=request.META.get("REMOTE_ADDR"),
                 )
-            messages.success(
-                request, f"{len(files)} file(s) uploaded successfully."
-            )
+            messages.success(request, f"{len(files)} file(s) uploaded successfully.")
             return redirect("core:task-detail", pk=task.pk)
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
@@ -154,7 +145,7 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
                 field="comment",
                 new_value=comment.text,
                 message=msg,
-                ip_address=request.META.get('REMOTE_ADDR'),
+                ip_address=request.META.get("REMOTE_ADDR"),
             )
             messages.success(request, "Comment added.")
             return redirect("core:task-detail", pk=task.pk)
@@ -239,21 +230,28 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         task = self.get_object()
         if not task.can_edit(request.user):
-            messages.error(
-                request, "You don't have permission to edit this task."
-            )
+            messages.error(request, "You don't have permission to edit this task.")
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         task = self.get_object()
-        key_fields = ["name", "description", "deadline", "priority", "task_type", "assigners"]
+        key_fields = [
+            "name",
+            "description",
+            "deadline",
+            "priority",
+            "task_type",
+            "assigners",
+        ]
         for field in key_fields:
             old_value = getattr(task, field)
             new_value = form.cleaned_data.get(field)
             if field == "assigners":
                 old_value = list(task.assigners.values_list("id", flat=True))
-                new_value = list(new_value.values_list("id", flat=True)) if new_value else []
+                new_value = (
+                    list(new_value.values_list("id", flat=True)) if new_value else []
+                )
             if old_value != new_value:
                 msg = f"User {self.request.user.get_username()} updated {field} from '{old_value}' to '{new_value}'"
                 log_task_action(
@@ -264,7 +262,7 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
                     old_value=str(old_value),
                     new_value=str(new_value),
                     message=msg,
-                    ip_address=self.request.META.get('REMOTE_ADDR'),
+                    ip_address=self.request.META.get("REMOTE_ADDR"),
                 )
         messages.success(self.request, "Task updated successfully.")
         return super().form_valid(form)
@@ -290,17 +288,13 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
         if not task:
             return redirect("core:task-list")
         if not task.can_delete(request.user):
-            messages.error(
-                request, "You don't have permission to delete this task."
-            )
+            messages.error(request, "You don't have permission to delete this task.")
             return redirect("core:task-detail", pk=task.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         task = self.get_object()
-        messages.success(
-            request, f'Task "{task.name}" has been deleted successfully.'
-        )
+        messages.success(request, f'Task "{task.name}" has been deleted successfully.')
         return super().delete(request, *args, **kwargs)
 
 
@@ -311,9 +305,7 @@ class TaskCompleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         task = get_object_or_404(Task, pk=kwargs["pk"])
         if not task.can_complete(request.user):
-            messages.error(
-                request, "You don't have permission to complete this task."
-            )
+            messages.error(request, "You don't have permission to complete this task.")
             return redirect("core:task-detail", pk=task.pk)
         task.is_completed = True
         task.save()
@@ -372,12 +364,8 @@ class WorkerDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         worker = self.get_object()
-        context["assigned_tasks"] = worker.assigned_tasks.filter(
-            is_completed=False
-        )
-        context["completed_tasks"] = worker.assigned_tasks.filter(
-            is_completed=True
-        )
+        context["assigned_tasks"] = worker.assigned_tasks.filter(is_completed=False)
+        context["completed_tasks"] = worker.assigned_tasks.filter(is_completed=True)
         context["created_tasks"] = worker.created_tasks.all()
         return context
 
@@ -499,9 +487,7 @@ class TeamAddMemberView(LoginRequiredMixin, View):
             return redirect("core:team-detail", pk=team.pk)
 
         TeamMember.objects.create(team=team, member=user)
-        messages.success(
-            request, f"{user.username} has been added to the team."
-        )
+        messages.success(request, f"{user.username} has been added to the team.")
         return redirect("core:team-detail", pk=team.pk)
 
 
@@ -526,9 +512,7 @@ class TeamRemoveMemberView(LoginRequiredMixin, View):
             return redirect("core:team-detail", pk=team.pk)
 
         TeamMember.objects.filter(team=team, member=user).delete()
-        messages.success(
-            request, f"{user.username} has been removed from the team."
-        )
+        messages.success(request, f"{user.username} has been removed from the team.")
         return redirect("core:team-detail", pk=team.pk)
 
 
@@ -564,12 +548,19 @@ class TeamTaskCreateView(LoginRequiredMixin, CreateView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy(
-            "core:team-detail", kwargs={"pk": self.kwargs["pk"]}
-        )
+        return reverse_lazy("core:team-detail", kwargs={"pk": self.kwargs["pk"]})
 
 
-def log_task_action(task, user, action, field='', old_value='', new_value='', message='', ip_address=None):
+def log_task_action(
+    task,
+    user,
+    action,
+    field="",
+    old_value="",
+    new_value="",
+    message="",
+    ip_address=None,
+):
     TaskLog.objects.create(
         task=task,
         user=user,

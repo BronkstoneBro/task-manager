@@ -23,9 +23,7 @@ class Team(models.Model):
         Worker, on_delete=models.CASCADE, related_name="created_teams"
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    members = models.ManyToManyField(
-        Worker, through="TeamMember", related_name="teams"
-    )
+    members = models.ManyToManyField(Worker, through="TeamMember", related_name="teams")
 
     def __str__(self):
         return self.name
@@ -112,9 +110,7 @@ class Task(models.Model):
 
 
 class TaskFile(models.Model):
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, related_name="files"
-    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="files")
     file = models.FileField(upload_to="task_files/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(
@@ -129,9 +125,7 @@ class TaskFile(models.Model):
 
 
 class Comment(models.Model):
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, related_name="comments"
-    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -155,9 +149,7 @@ class TaskLog(models.Model):
         COMPLETE = "complete", "Complete"
         UNCOMPLETE = "uncomplete", "Uncomplete"
 
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, related_name="logs"
-    )
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="logs")
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -176,4 +168,7 @@ class TaskLog(models.Model):
         ordering = ["-timestamp"]
 
     def __str__(self):
-        return self.message or f"{self.get_action_display()} {self.field} of task {self.task_id} by user {self.user_id} at {self.timestamp}"
+        return (
+            self.message
+            or f"{self.get_action_display()} {self.field} of task {self.task_id} by user {self.user_id} at {self.timestamp}"
+        )
